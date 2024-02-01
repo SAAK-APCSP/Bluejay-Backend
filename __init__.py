@@ -18,7 +18,7 @@ cors = CORS(app, supports_credentials=True)
 dbURI = 'sqlite:///volumes/sqlite.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SQLALCHEMY_DATABASE_URI'] = dbURI
-SECRET_KEY = os.environ.get('SECRET_KEY') or 'SECRET_KEY'
+SECRET_KEY = os.environ.get('SECRET_KEY') or 'eyJhbGciOiJIUzI1NiJ9.eyJSb2xlIjoiQWRtaW4iLCJJc3N1ZXIiOiJJc3N1ZXIiLCJVc2VybmFtZSI6IkphdmFJblVzZSIsImV4cCI6MTczNzY1NDAzOCwiaWF0IjoxNzA2MDMxNjM4fQ.rxW6oIxB9UItQCrE_TvjWW28Cm-BZs1O-BiUJJ_FrgQ'
 app.config['SECRET_KEY'] = SECRET_KEY
 db = SQLAlchemy()
 Migrate(app, db)
