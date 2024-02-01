@@ -10,8 +10,6 @@ from __init__ import app, db, cors  # Definitions initialization
 
 
 # setup APIs
-from api.covid import covid_api # Blueprint import api definition
-from api.joke import joke_api # Blueprint import api definition
 from api.user import user_api # Blueprint import api definition
 from api.player import player_api
 # database migrations
@@ -26,8 +24,6 @@ from projects.projects import app_projects # Blueprint directory import projects
 db.init_app(app)
 
 # register URIs
-app.register_blueprint(joke_api) # register api routes
-app.register_blueprint(covid_api) # register api routes
 app.register_blueprint(user_api) # register api routes
 app.register_blueprint(player_api)
 app.register_blueprint(app_projects) # register app pages
@@ -49,7 +45,7 @@ def table():
 def before_request():
     # Check if the request came from a specific origin
     allowed_origin = request.headers.get('Origin')
-    if allowed_origin in ['http://localhost:4100', 'http://127.0.0.1:4100', 'https://nighthawkcoders.github.io']:
+    if allowed_origin in ['http://localhost:4200', 'http://127.0.0.1:4200', 'https://nighthawkcoders.github.io', 'http://0.0.0.0:4200/student/']:
         cors._origins = allowed_origin
 
 # Create an AppGroup for custom commands
