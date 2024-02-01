@@ -31,7 +31,6 @@ class UserAPI:
             # look for password and dob
             password = body.get('password')
             dob = body.get('dob')
-
             ''' #1: Key code block, setup USER OBJECT '''
             uo = User(name=name, 
                       uid=uid)
@@ -55,12 +54,38 @@ class UserAPI:
                 return jsonify(user.read())
             # failure returns error
             return {'message': f'Processed {name}, either a format error or User ID {uid} is duplicate'}, 400
+        @token_required
+        def get(self, current_user): # Read Method
+            users = User.query.all()    # read/extract all users from database
+            json_ready = [user.read() for user in users]  # prepare output in json
+            return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
+
 
         @token_required
         def get(self, current_user): # Read Method
             users = User.query.all()    # read/extract all users from database
             json_ready = [user.read() for user in users]  # prepare output in json
             return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
+        
+        def put(self, user_id):
+            '''Update a user'''
+            user = User.query.get(user_id)
+            if not user:
+                return {'message': 'User not found'}, 404
+            body = request.get_json()
+            user.name = body.get('name', user.name)
+            user.uid = body.get('uid', user.uid)
+            db.session.commit()
+            return user.read(), 200
+
+        def delete(self, user_id):
+            '''Delete a user'''
+            user = User.query.get(user_id)
+            if not user:
+                return {'message': 'User not found'}, 404
+            db.session.delete(user)
+            db.session.commit()
+            return {'message': 'User deleted'}, 200
     
     class _Security(Resource):
         def post(self):
@@ -116,9 +141,48 @@ class UserAPI:
                         "error": str(e),
                         "data": None
                 }, 500
+    class Login(Resource):
+        def post(self):
+            data = request.get_json()
 
+            uid = data.get('uid')
+            password = data.get('password')
+
+            if not uid or not password:
+                response = {'message': 'Invalid creds'}
+                return make_response(jsonify(response), 401)
+
+            user = User.query.filter_by(_uid=uid).first()
+
+            if user and user.is_password(password):
+         
+                response = {
+                    'message': 'Logged in successfully',
+                    'user': {
+                        'name': user.name,  
+                        'id': user.id
+                    }
+                }
+                return make_response(jsonify(response), 200)
+
+            response = {'message': 'Invalid id or pass'}
+            return make_response(jsonify(response), 401)
+    class _Create(Resource):
+        def post(self):
+            body = request.get_json()
+            # Fetch data from the form
+            name = body.get('name')
+            uid = body.get('uid')
+            password = body.get('password')
+            if uid is not None:
+                new_user = User(name=name, uid=uid, password=password)
+            user = new_user.create()
+            if user:
+                return user.read()
+            return {'message': f'Processed {name}, either a format error or User ID {uid} is duplicate'}, 400
             
     # building RESTapi endpoint
     api.add_resource(_CRUD, '/')
     api.add_resource(_Security, '/authenticate')
-    
+    api.add_resource(Login, '/login')
+    api.add_resource(_Create, '/create')
