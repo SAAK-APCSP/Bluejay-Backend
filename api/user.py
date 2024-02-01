@@ -109,8 +109,12 @@ class UserAPI:
                     return {'message': f"Invalid user id or password"}, 400
                 if user:
                     try:
+                        token_payload = {
+                            "_uid": user._uid,
+                            "role": user.role 
+                        }
                         token = jwt.encode(
-                            {"_uid": user._uid},
+                            token_payload,
                             current_app.config["SECRET_KEY"],
                             algorithm="HS256"
                         )

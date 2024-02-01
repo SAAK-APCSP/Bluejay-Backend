@@ -183,6 +183,7 @@ class User(db.Model):
             "uid": self.uid,
             "dob": self.dob,
             "age": self.age,
+            "role": self.role,
             "posts": [post.read() for post in self.posts]
         }
 
