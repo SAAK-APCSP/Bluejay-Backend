@@ -178,8 +178,9 @@ class UserAPI:
             name = body.get('name')
             uid = body.get('uid')
             password = body.get('password')
+            role = body.get('role')
             if uid is not None:
-                new_user = User(name=name, uid=uid, password=password)
+                new_user = User(name=name, uid=uid, password=password, role=role)
             user = new_user.create()
             if user:
                 return user.read()
