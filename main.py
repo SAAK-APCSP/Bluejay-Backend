@@ -7,7 +7,7 @@ from flask.cli import AppGroup
 
 # import "packages" from "this" project
 from __init__ import app, db, cors  # Definitions initialization
-
+# commit test
 
 # setup APIs
 from api.user import user_api # Blueprint import api definition
