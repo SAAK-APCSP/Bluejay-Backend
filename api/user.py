@@ -185,9 +185,29 @@ class UserAPI:
             if user:
                 return user.read()
             return {'message': f'Processed {name}, either a format error or User ID {uid} is duplicate'}, 400
+    class _Delete(Resource):
+        def post(self): # Delete Method
+            body = request.get_json()
+            uid = body.get('uid')
+            password = body.get('password')
+            user = User.query.filter_by(_uid=uid).first()
+            if user is None or not user.is_password(password):
+                return {'message': f'User {uid} not found'}, 404
+            json = user.read()
+            if user:
+                try:
+                    user.delete() 
+                except Exception as e:
+                    return {
+                        "error": "Something went wrong!",
+                        "message": str(e)
+                    }, 500
+            # 204 is the status code for delete with no json response
+            return f"Deleted user: {json}", 204 # use 200 to test with Postman
             
     # building RESTapi endpoint
     api.add_resource(_CRUD, '/')
     api.add_resource(_Security, '/authenticate')
     api.add_resource(Login, '/login')
     api.add_resource(_Create, '/create')
+    api.add_resource(_Delete, '/delete')
