@@ -5,13 +5,44 @@ from datetime import datetime
 from auth_middleware import token_required
 
 from model.users import User
+from model.users import Messages
 
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api/users')
 
+message_api = Blueprint('message_api', __name__, 
+                    url_prefix='/api/message')
+
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
 api = Api(user_api)
+m_api = Api(message_api)
 
+class MessageAPI:
+    class _CRUD(Resource):
+        def post(self):
+            body = request.get_json()
+
+            uid = body.get('uid')
+            message = body.get('message')
+
+            uo = Messages(uid=uid,
+                          message=message)
+
+            message = uo.create()
+            # success returns json of user
+            if message:
+                return jsonify(message.read())
+        def put(self, message_id):
+            '''Update a user'''
+            message = User.query.get(message_id)
+            if not message:
+                return {'message': 'Message not found'}, 404
+            body = request.get_json()
+            message.message = body.get('message', message.message)
+            message.uid = body.get('uid', message.uid)
+            db.session.commit()
+            return message.read(), 200
+            # failure returns error
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
         @token_required
@@ -60,12 +91,6 @@ class UserAPI:
             json_ready = [user.read() for user in users]  # prepare output in json
             return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
 
-
-        @token_required
-        def get(self, current_user): # Read Method
-            users = User.query.all()    # read/extract all users from database
-            json_ready = [user.read() for user in users]  # prepare output in json
-            return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
         
         def put(self, user_id):
             '''Update a user'''
