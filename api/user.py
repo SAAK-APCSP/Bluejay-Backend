@@ -21,7 +21,6 @@ class MessageAPI:
     class _CRUD(Resource):
         def post(self):
             body = request.get_json()
-
             uid = body.get('uid')
             message_text = body.get('message')
 
@@ -65,6 +64,22 @@ class MessageAPI:
             message_list = [message.read() for message in messages]
             return jsonify(message_list)
 
+    class _Send(Resource):
+        def post(self):
+            body = request.get_json()
+            # Fetch data from the form
+            name = body.get('name')
+            uid = body.get('uid')
+            message = body.get('message')
+            date = body.get('date')
+            if uid is not None:
+                new_message = Messages(name=name, uid=uid, message=message, _date=date)
+            message = new_message.create()
+            if message:
+                return message.read()
+            return {'message': f'Processed {name}, either a format error or User ID {uid} is duplicate'}, 400
+    m_api.add_resource(_CRUD, '/')
+    m_api.add_resource(_Send, '/send')
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
         @token_required

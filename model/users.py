@@ -211,7 +211,7 @@ class Messages(db.Model):
     __tablename__ = 'messages'
 
     _uid = db.Column(db.String(255), primary_key=True)
-    # _name = db.Column(db.String(255), unique=False, nullable=False)
+    _name = db.Column(db.String(255), unique=False, nullable=False)
     _date = db.Column(db.Date)
     _message = db.Column(db.String(), nullable=False, unique=False)
     # _role = db.Column(db.String(20), nullable=False, unique=False)
