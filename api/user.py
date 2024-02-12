@@ -23,26 +23,48 @@ class MessageAPI:
             body = request.get_json()
 
             uid = body.get('uid')
-            message = body.get('message')
+            message_text = body.get('message')
 
-            uo = Messages(uid=uid,
-                          message=message)
+            # Get sender's name from the uid
+            sender = User.query.filter_by(uid=uid).first()
+            if not sender:
+                return {'message': 'Sender not found'}, 404
 
-            message = uo.create()
-            # success returns json of user
-            if message:
-                return jsonify(message.read())
+            message = Messages(uid=uid,
+                               name=sender.name,
+                               message=message_text,
+                               date_sent=None,  # You can set the date_sent accordingly
+                               likes=0,
+                               comments=0)
+
+            db.session.add(message)
+            db.session.commit()
+
+            # Success returns json of the message
+            return jsonify(message.read())
+
         def put(self, message_id):
-            '''Update a user'''
-            message = User.query.get(message_id)
+            '''Update a message'''
+            message = Messages.query.get(message_id)
             if not message:
                 return {'message': 'Message not found'}, 404
+
             body = request.get_json()
             message.message = body.get('message', message.message)
             message.uid = body.get('uid', message.uid)
+
+            # Update other fields as needed (e.g., likes, comments)
+
             db.session.commit()
-            return message.read(), 200
-            # failure returns error
+            return jsonify(message.read()), 200
+            # Failure returns error
+
+        def get(self):
+            '''Get all messages'''
+            messages = Messages.query.all()
+            message_list = [message.read() for message in messages]
+            return jsonify(message_list)
+
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
         @token_required
