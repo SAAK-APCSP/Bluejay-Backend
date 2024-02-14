@@ -207,14 +207,6 @@ class User(db.Model):
         db.session.commit()
         return None
 
-class Messages(db.Model):
-    __tablename__ = 'messages'
-
-    _uid = db.Column(db.String(255), primary_key=True)
-    # _name = db.Column(db.String(255), unique=False, nullable=False)
-    _date = db.Column(db.Date)
-    _message = db.Column(db.String(), nullable=False, unique=False)
-    # _role = db.Column(db.String(20), nullable=False, unique=False)
 
 """Database Creation and Testing """
 
@@ -229,9 +221,7 @@ def initUsers():
         u2 = User(name='Nicholas Tesla', uid='niko', password='123niko', dob=date(1856, 7, 10), role='User')
         u3 = User(name='Alexander Graham Bell', uid='lex', role='User')
         u4 = User(name='Grace Hopper', uid='hop', password='123hop', dob=date(1906, 12, 9), role='Admin')
-        test_message = Messages(_uid='Hello', _name='Test', _date='', _message='hfdbjhbshjvbdjhsfbvjdsfbvhlbgjlhdfbvhbdsfjhkvhhlkdsbfvklbdjfsbvibfdvjhbvhbdhjksvbf hjhdbfjhvb jkdfbvjkhfdkjbvjbdfjkvbjkfdhvhbvjfdbvhjjhdfbjvbhjfhjdvjbakshjhkcb blkdjhgkjifid hf kj htophtoijhdfiohtiojhhjfiofhhifjduigfkjbiufdhefh8iugfjdvjhjbfbrjkuhfbjgdhfygufnvghfjdh vjbvfdsbbjds vbjhdfjhjs jkfhvjkdwbhvhdsiojb fjnsdhvi vdhjshoidvjksdhjajh', _role='User')
         users = [u1, u2, u3, u4]
-        messages = [test_message]
 
         """Builds sample user/note(s) data"""
         for user in users:
