@@ -51,13 +51,9 @@ class Message(db.Model):
     # CRUD create/add a new record to the table
     # returns self or None on error
     def create(self):
-        try:
-            db.session.add(self)
-            db.session.commit()
-            return self
-        except IntegrityError:
-            db.session.remove()
-            return None
+        db.session.add(self)
+        db.session.commit()
+        return self
 
     # CRUD read converts self to dictionary
     # returns dictionary
