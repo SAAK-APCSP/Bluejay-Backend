@@ -61,7 +61,7 @@ class UserAPI:
             json_ready = [user.read() for user in users]  # prepare output in json
             return jsonify(json_ready)  # jsonify creates Flask response object, more specific to APIs than json.dumps
 
-        
+        # Put function for user
         def put(self, user_id):
             '''Update a user'''
             user = User.query.get(user_id)
@@ -72,7 +72,7 @@ class UserAPI:
             user.uid = body.get('uid', user.uid)
             db.session.commit()
             return user.read(), 200
-
+        # Delete function for user
         def delete(self, user_id):
             '''Delete a user'''
             user = User.query.get(user_id)
