@@ -3,83 +3,16 @@ from flask import Blueprint, request, jsonify, current_app, Response
 from flask_restful import Api, Resource # used for REST API building
 from datetime import datetime
 from auth_middleware import token_required
-
 from model.users import User
-from model.users import Messages
 
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api/users')
 
 message_api = Blueprint('message_api', __name__, 
-                    url_prefix='/api/message')
+                    url_prefix='/api/messages')
 
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
 api = Api(user_api)
-m_api = Api(message_api)
-
-class MessageAPI:
-    class _CRUD(Resource):
-        def post(self):
-            body = request.get_json()
-            uid = body.get('uid')
-            message_text = body.get('message')
-
-            # Get sender's name from the uid
-            sender = User.query.filter_by(uid=uid).first()
-            if not sender:
-                return {'message': 'Sender not found'}, 404
-
-            message = Messages(uid=uid,
-                               name=sender.name,
-                               message=message_text,
-                               date_sent=None,  # You can set the date_sent accordingly
-                               likes=0,
-                               comments=0)
-
-            db.session.add(message)
-            db.session.commit()
-
-            # Success returns json of the message
-            return jsonify(message.read())
-
-        def put(self, message_id):
-            '''Update a message'''
-            message = Messages.query.get(message_id)
-            if not message:
-                return {'message': 'Message not found'}, 404
-
-            body = request.get_json()
-            message.message = body.get('message', message.message)
-            message.uid = body.get('uid', message.uid)
-
-            # Update other fields as needed (e.g., likes, comments)
-
-            db.session.commit()
-            return jsonify(message.read()), 200
-            # Failure returns error
-
-        def get(self):
-            '''Get all messages'''
-            messages = Messages.query.all()
-            message_list = [message.read() for message in messages]
-            return jsonify(message_list)
-
-    class _Send(Resource):
-        def post(self):
-            body = request.get_json()
-            # Fetch data from the form
-            name = body.get('name')
-            uid = body.get('uid')
-            message = body.get('message')
-            date = body.get('date')
-            if uid is not None:
-                new_message = Messages(name=name, uid=uid, message=message, _date=date)
-            message = new_message.create()
-            if message:
-                return message.read()
-            return {'message': f'Processed {name}, either a format error or User ID {uid} is duplicate'}, 400
-    m_api.add_resource(_CRUD, '/')
-    m_api.add_resource(_Send, '/send')
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
         @token_required
