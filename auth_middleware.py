@@ -2,7 +2,7 @@ from functools import wraps
 import jwt
 from flask import request, abort, current_app
 from model.users import User
-from model.messages import Message  # Import the Message class
+from model.messages import Message # Import the Message class
 
 def token_required(roles=None):
     def decorator(f):
@@ -17,19 +17,7 @@ def token_required(roles=None):
                 }, 401
             try:
                 data = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])
-                current_user = User.query.filter_by(_uid=data["_uid"]).first()
-                if current_user is None:
-                    return {
-                        "message": "Invalid Authentication token!",
-                        "data": None,
-                        "error": "Unauthorized"
-                    }, 401
-                if roles and current_user.role not in roles:
-                    return {
-                        "message": "Insufficient permissions. Required roles: {}".format(roles),
-                        "data": None,
-                        "error": "Forbidden"
-                    }, 403
+                current_message = Message.query.filter_by(_uid=data["_uid"]).first()
             except Exception as e:
                 return {
                     "message": "Something went wrong",
@@ -37,7 +25,7 @@ def token_required(roles=None):
                     "error": str(e)
                 }, 500
 
-            return f(current_user, *args, **kwargs)  # Pass current_user to the decorated function
+            return f(current_message, *args, **kwargs)  # Pass current_user to the decorated function
 
         return decorated
 

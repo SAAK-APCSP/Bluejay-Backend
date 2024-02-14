@@ -64,6 +64,7 @@ class Message(db.Model):
     # returns dictionary
     def read(self):
         return {
+            "id": self.id,
             "uid": self.uid,
             "message": self.message,
             "date": self.date

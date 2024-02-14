@@ -34,7 +34,9 @@ class MessageAPI:
             messages = Message.query.all()
             json_ready = [message.read() for message in messages]
             return jsonify(json_ready)
-            
+        
+        def put(self, message):
+            Message.update(message)
     class _Send(Resource):
         def post(self):
             body = request.get_json()
