@@ -65,6 +65,20 @@ class MessageAPI:
             message_list = [message.read() for message in messages]
             return jsonify(message_list)
 
+        def like_post(self, message_id):
+            '''Like a post'''
+            message = Messages.query.get(message_id)
+            if not message:
+                return {'message': 'Message not found'}, 404
+
+            # Increment the likes count
+            message.likes += 1
+            db.session.commit()
+
+            return jsonify(message.read()), 200
+
+    _CRUD.methods.append('LIKE')
+
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
         @token_required
@@ -258,3 +272,5 @@ class UserAPI:
     api.add_resource(Login, '/login')
     api.add_resource(_Create, '/create')
     api.add_resource(_Delete, '/delete')
+
+api.add_resource(MessageAPI._CRUD, '/', '/<int:message_id>', '/like/<int:message_id>')
