@@ -35,29 +35,19 @@ class MessageAPI:
             messages = Message.query.all()
             json_ready = [message.read() for message in messages]
             return jsonify(json_ready)
-
+            
     class _Send(Resource):
-        @token_required
-        def post(self): # Send Method
+        def post(self):
             body = request.get_json()
+            # Fetch data from the form
             uid = body.get('uid')
             message = body.get('message')
-
-            if not uid or not message:
-                return {'message': 'Receiver UID or message content is missing'}, 400
-            
-            receiver = User.query.filter_by(_uid=uid).first()
-
-            if not receiver:
-                return {'message': 'Receiver not found'}, 404
-            
-            message = Message(receiver_uid=uid, message=message)
-
-            try:
-                created_message = message.create()
-                return jsonify(created_message.read()), 201
-            except Exception as e:
-                return {'message': f'Failed to send message: {str(e)}'}, 500
+            if uid is not None:
+                new_message = Message(uid=uid, message=message)
+            message = new_message.create()
+            if message:
+                return message.read()
+            return {'message': f'Processed {uid}, either a format error or User ID {uid} is duplicate'}, 400
 
     class _Delete(Resource):
         @token_required
