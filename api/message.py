@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify, current_app, Response
 from flask_restful import Api, Resource
 from datetime import datetime
 from auth_middleware import token_required
-from model.users import User
 from model.messages import Message  # Import the Message class
 
 message_api = Blueprint('message_api', __name__, url_prefix='/api/messages')
@@ -30,8 +29,8 @@ class MessageAPI:
             except Exception as e:
                 return {'message': f'Failed to create message: {str(e)}'}, 500
 
-        @token_required
-        def get(self, current_user, Message): # Read Method
+        @token_required()
+        def get(self, _): # Read Method
             messages = Message.query.all()
             json_ready = [message.read() for message in messages]
             return jsonify(json_ready)

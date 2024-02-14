@@ -28,7 +28,7 @@ class Message(db.Model):
     
     # a setter function, allows uid to be updated after initial object creation
     @uid.setter
-    def uid(self, uid):
+    def is_uid(self, uid):
         self._uid = uid
 
     # a message getter method, extracts message from object
@@ -51,9 +51,14 @@ class Message(db.Model):
     # CRUD create/add a new record to the table
     # returns self or None on error
     def create(self):
-        db.session.add(self)
-        db.session.commit()
-        return self
+        try:
+            # creates a person object from User(db.Model) class, passes initializers
+            db.session.add(self)  # add prepares to persist person object to Users table
+            db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
+            return self
+        except IntegrityError:
+            db.session.remove()
+            return None
 
     # CRUD read converts self to dictionary
     # returns dictionary
