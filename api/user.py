@@ -5,7 +5,6 @@ from datetime import datetime
 from auth_middleware import token_required
 
 from model.users import User
-from model.users import Messages
 
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api/users')

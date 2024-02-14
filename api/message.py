@@ -10,17 +10,18 @@ api = Api(message_api)
 
 class MessageAPI:
     class _CRUD(Resource):
-        @token_required
-        def post(self, current_user, Message): # Create Method
+        @token_required()
+        def post(self, Message): # Create Method
             body = request.get_json()
             
             # Validate message content
+            uid = body.get('uid')
             message_content = body.get('message')
             if not message_content:
                 return {'message': 'Message content is missing'}, 400
             
             # Create Message object
-            message = Message(uid=current_user.uid, message=message_content)
+            message = Message(uid=uid, message=message_content)
             
             # Add message to database
             try:
