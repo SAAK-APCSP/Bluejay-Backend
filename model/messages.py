@@ -84,8 +84,9 @@ class Message(db.Model):
 
     # CRUD update: updates message content
     # returns self
-    def update(self, message):
-        self.message = message
+    def update(self, old_message, new_message):
+        message = Message.query.get(old_message)
+        message.message = new_message
         db.session.commit()
         return self
 

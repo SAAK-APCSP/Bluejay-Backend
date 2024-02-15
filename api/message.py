@@ -3,6 +3,7 @@ from flask_restful import Api, Resource
 from datetime import datetime
 from auth_middleware import token_required
 from model.messages import Message  # Import the Message class
+from __init__ import app, db
 
 message_api = Blueprint('message_api', __name__, url_prefix='/api/messages')
 
@@ -35,8 +36,8 @@ class MessageAPI:
             json_ready = [message.read() for message in messages]
             return jsonify(json_ready)
         
-        def put(self, message):
-            Message.update(message)
+        def put(self, old_message, new_message, likes):
+            Message.update(old_message, new_message, likes)
     class _Send(Resource):
         def post(self):
             body = request.get_json()
@@ -50,20 +51,31 @@ class MessageAPI:
             if message:
                 return message.read()
             return {'message': f'Processed {uid}, either a format error or User ID {uid} is duplicate'}, 400
+    
+    class _Likes(Resource):
+        def put(self, Message):
+            body = request.get_json()
+            message = body.get('message')
+            likes = body.get('likes')
+            message = Message.query.filter_by(_message=message).first()
+            message.update_likes(likes+1)
+            return self
 
     class _Delete(Resource):
-        @token_required
-        def delete(self, current_user, Message): # Delete Method
+        @token_required()
+        def delete(self, x): # Delete Method
             body = request.get_json()
-            message_id = body.get('message_id')
+            message_id = body.get('message')
+            uid = body.get('uid')
             if not message_id:
                 return {'message': 'Message ID is missing'}, 400
 
-            message = Message.query.get(message_id)
+            for message in Message.query.all():
+                pass
             if not message:
                 return {'message': 'Message not found'}, 404
 
-            if message.uid != current_user.uid:
+            if message.uid != uid:
                 return {'message': 'You are not authorized to delete this message'}, 403
 
             try:
@@ -75,3 +87,4 @@ class MessageAPI:
 api.add_resource(MessageAPI._CRUD, '/')
 api.add_resource(MessageAPI._Send, '/send')
 api.add_resource(MessageAPI._Delete, '/delete')
+api.add_resource(MessageAPI._Likes, '/like')
