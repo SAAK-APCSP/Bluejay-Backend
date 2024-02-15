@@ -54,8 +54,9 @@ class Message(db.Model):
         return self._likes
     
     @likes.setter
-    def update_likes(self, likes):
+    def likes(self, likes):
         self._likes = likes
+        db.session.commit()
     
     # date should have a setter method as well if needed for updates
     

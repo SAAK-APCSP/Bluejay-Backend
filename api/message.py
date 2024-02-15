@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify, current_app, Response
 from flask_restful import Api, Resource
 from datetime import datetime
+import jwt
 from auth_middleware import token_required
 from model.messages import Message  # Import the Message class
 from __init__ import app, db
@@ -40,9 +41,10 @@ class MessageAPI:
             Message.update(old_message, new_message, likes)
     class _Send(Resource):
         def post(self):
+            token = request.cookies.get("jwt")
+            uid = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # current user
             body = request.get_json()
             # Fetch data from the form
-            uid = body.get('uid')
             message = body.get('message')
             likes = body.get('likes')
             if uid is not None:
@@ -53,13 +55,11 @@ class MessageAPI:
             return {'message': f'Processed {uid}, either a format error or User ID {uid} is duplicate'}, 400
     
     class _Likes(Resource):
-        def put(self, Message):
+        def put(self):
             body = request.get_json()
             message = body.get('message')
-            likes = body.get('likes')
             message = Message.query.filter_by(_message=message).first()
-            message.update_likes(likes+1)
-            return self
+            message.likes += 1
 
     class _Delete(Resource):
         @token_required()
