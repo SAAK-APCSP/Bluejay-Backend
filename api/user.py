@@ -9,74 +9,9 @@ from model.users import User
 user_api = Blueprint('user_api', __name__,
                    url_prefix='/api/users')
 
-message_api = Blueprint('message_api', __name__, 
-                    url_prefix='/api/message')
 
 # API docs https://flask-restful.readthedocs.io/en/latest/api.html
 api = Api(user_api)
-m_api = Api(message_api)
-
-class MessageAPI:
-    class _CRUD(Resource):
-        def post(self):
-            body = request.get_json()
-
-            uid = body.get('uid')
-            message_text = body.get('message')
-
-            # Get sender's name from the uid
-            sender = User.query.filter_by(uid=uid).first()
-            if not sender:
-                return {'message': 'Sender not found'}, 404
-
-            message = Messages(uid=uid,
-                               name=sender.name,
-                               message=message_text,
-                               date_sent=None,  # You can set the date_sent accordingly
-                               likes=0,
-                               comments=0)
-
-            db.session.add(message)
-            db.session.commit()
-
-            # Success returns json of the message
-            return jsonify(message.read())
-
-        def put(self, message_id):
-            '''Update a message'''
-            message = Messages.query.get(message_id)
-            if not message:
-                return {'message': 'Message not found'}, 404
-
-            body = request.get_json()
-            message.message = body.get('message', message.message)
-            message.uid = body.get('uid', message.uid)
-
-            # Update other fields as needed (e.g., likes, comments)
-
-            db.session.commit()
-            return jsonify(message.read()), 200
-            # Failure returns error
-
-        def get(self):
-            '''Get all messages'''
-            messages = Messages.query.all()
-            message_list = [message.read() for message in messages]
-            return jsonify(message_list)
-
-        def like_post(self, message_id):
-            '''Like a post'''
-            message = Messages.query.get(message_id)
-            if not message:
-                return {'message': 'Message not found'}, 404
-
-            # Increment the likes count
-            message.likes += 1
-            db.session.commit()
-
-            return jsonify(message.read()), 200
-
-    _CRUD.methods.append('LIKE')
 
 class UserAPI:        
     class _CRUD(Resource):  # User API operation for Create, Read.  THe Update, Delete methods need to be implemeented
@@ -271,5 +206,3 @@ class UserAPI:
     api.add_resource(Login, '/login')
     api.add_resource(_Create, '/create')
     api.add_resource(_Delete, '/delete')
-
-api.add_resource(MessageAPI._CRUD, '/', '/<int:message_id>', '/like/<int:message_id>')

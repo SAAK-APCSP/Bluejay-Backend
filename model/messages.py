@@ -15,11 +15,14 @@ class Message(db.Model):
     _uid = db.Column(db.String(255), unique=False, nullable=False)
     _message = db.Column(db.Text, nullable=False)
     _date = db.Column(db.DateTime, nullable=False, default=date.today())
+    _likes = db.Column(db.Integer, nullable=False, default=0)
     
     # constructor of a Message object, initializes the instance variables within object (self)
-    def __init__(self, uid, message):
+    def __init__(self, uid, message, likes, date=date.today()):
         self._uid = uid
         self._message = message
+        self._date = date
+        self._likes = likes
 
     # a uid getter method, extracts uid from object
     @property
@@ -46,6 +49,14 @@ class Message(db.Model):
     def date(self):
         return self._date.strftime('%m-%d-%Y %H:%M:%S')
     
+    @property
+    def likes(self):
+        return self._likes
+    
+    @likes.setter
+    def update_likes(self, likes):
+        self._likes = likes
+    
     # date should have a setter method as well if needed for updates
     
     # CRUD create/add a new record to the table
@@ -67,7 +78,8 @@ class Message(db.Model):
             "id": self.id,
             "uid": self.uid,
             "message": self.message,
-            "date": self.date
+            "date": self.date,
+            "likes": self.likes
         }
 
     # CRUD update: updates message content
@@ -90,10 +102,10 @@ def initMessages():
         db.create_all()
         
         """Tester data for table"""
-        m1 = Message(uid='toby', message='Hello from Thomas Edison')
-        m2 = Message(uid='niko', message='Greetings from Nicholas Tesla')
-        m3 = Message(uid='lex', message='Welcome from Alexander Graham Bell')
-        m4 = Message(uid='hop', message='Good day from Grace Hopper')
+        m1 = Message(uid='toby', message='Hello from Thomas Edison', likes=3)
+        m2 = Message(uid='niko', message='Greetings from Nicholas Tesla', likes=0)
+        m3 = Message(uid='lex', message='Welcome from Alexander Graham Bell', likes=27)
+        m4 = Message(uid='hop', message='Good day from Grace Hopper', likes=-74)
         messages = [m1, m2, m3, m4]
 
         """Add message data to the table"""
