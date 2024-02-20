@@ -58,3 +58,59 @@ class Message(db.Model):
         self._likes = likes
         db.session.commit()
     
+    def create(self):
+        try:
+            # creates a person object from User(db.Model) class, passes initializers
+            db.session.add(self)  # add prepares to persist person object to Users table
+            db.session.commit()  # SqlAlchemy "unit of work pattern" requires a manual commit
+            return self
+        except IntegrityError:
+            db.session.remove()
+            return None
+
+    # CRUD read converts self to dictionary
+    # returns dictionary
+    def read(self):
+        return {
+            "id": self.id,
+            "uid": self.uid,
+            "message": self.message,
+            "date": self.date,
+            "likes": self.likes
+        }
+
+    # CRUD update: updates message content
+    # returns self
+    def update(self, old_message, new_message):
+        message = Message.query.get(old_message)
+        message.message = new_message
+        db.session.commit()
+        return self
+
+    # CRUD delete: remove self
+    # None
+    def delete(self):
+        db.session.delete(self)
+        db.session.commit()
+        return None
+
+def initMessages():
+    with app.app_context():
+        """Create database and tables"""
+        db.create_all()
+
+        """Tester data for table"""
+        m1 = Message(uid='toby', message='Hello from Thomas Edison', likes=3)
+        m2 = Message(uid='niko', message='Greetings from Nicholas Tesla', likes=0)
+        m3 = Message(uid='lex', message='Welcome from Alexander Graham Bell', likes=27)
+        m4 = Message(uid='hop', message='Good day from Grace Hopper', likes=-74)
+        messages = [m1, m2, m3, m4]
+
+        """Add message data to the table"""
+        for message in messages:
+            try:
+                message.create()
+            except IntegrityError:
+                '''fails with bad or duplicate data'''
+                db.session.remove()
+                print(f"Records exist, duplicate message, or error: {message.uid}")
