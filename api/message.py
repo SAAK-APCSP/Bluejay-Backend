@@ -76,4 +76,15 @@ class MessageAPI:
                 return {'message': 'Message deleted successfully'}, 200
             except Exception as e:
                 return {'message': f'Failed to delete message: {str(e)}'}, 500
+        
+    class _Likes(Resource):
+        def put(self):
+            body = request.get_json()
+            message = body.get('message')
+            message = Message.query.filter_by(_message=message).first()
+            message.likes += 1
 
+api.add_resource(MessageAPI._CRUD, '/')
+api.add_resource(MessageAPI._Send, '/send')
+api.add_resource(MessageAPI._Delete, '/delete')
+api.add_resource(MessageAPI._Likes, '/like') 
