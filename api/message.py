@@ -39,3 +39,41 @@ class MessageAPI:
 
         def put(self, old_message, new_message, likes):
             Message.update(old_message, new_message, likes)
+    class _Send(Resource):
+        def post(self):
+            token = request.cookies.get("jwt")
+            uid = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])['_uid'] # current user
+            body = request.get_json()
+            # Fetch data from the form
+            message = body.get('message')
+            likes = body.get('likes')
+            if uid is not None:
+                new_message = Message(uid=uid, message=message, likes=likes)
+            message = new_message.create()
+            if message:
+                return message.read()
+            return {'message': f'Processed {uid}, either a format error or User ID {uid} is duplicate'}, 400
+
+    class _Delete(Resource):
+        @token_required()
+        def delete(self, x): # Delete Method
+            body = request.get_json()
+            message_id = body.get('message')
+            uid = body.get('uid')
+            if not message_id:
+                return {'message': 'Message ID is missing'}, 400
+
+            for message in Message.query.all():
+                pass
+            if not message:
+                return {'message': 'Message not found'}, 404
+
+            if message.uid != uid:
+                return {'message': 'You are not authorized to delete this message'}, 403
+
+            try:
+                message.delete()
+                return {'message': 'Message deleted successfully'}, 200
+            except Exception as e:
+                return {'message': f'Failed to delete message: {str(e)}'}, 500
+
